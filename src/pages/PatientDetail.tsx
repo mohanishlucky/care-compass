@@ -184,6 +184,9 @@ export default function PatientDetail() {
             </div>
           </div>
         )}
+
+        {/* Doctor Notes */}
+        <DoctorNotes patientId={patient.id} doctorName={doctorName} />
       </main>
     </div>
   );
