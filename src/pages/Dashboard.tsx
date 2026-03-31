@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
 import { generatePatients } from "@/lib/mock-data";
 import { PatientCard } from "@/components/PatientCard";
+import { AddPatientDialog } from "@/components/AddPatientDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,13 +14,14 @@ import {
   AlertTriangle,
   Activity,
 } from "lucide-react";
-import { PatientStatus } from "@/lib/types";
+import { Patient, PatientStatus } from "@/lib/types";
 
-const patients = generatePatients();
+const initialPatients = generatePatients();
 
 export default function Dashboard() {
   const { doctorName, logout } = useAuth();
   const navigate = useNavigate();
+  const [patients, setPatients] = useState<Patient[]>(initialPatients);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<PatientStatus | "All">("All");
 
@@ -31,14 +33,18 @@ export default function Dashboard() {
       const matchFilter = filter === "All" || p.status === filter;
       return matchSearch && matchFilter;
     });
-  }, [search, filter]);
+  }, [search, filter, patients]);
 
   const stats = useMemo(() => ({
     total: patients.length,
     critical: patients.filter((p) => p.status === "Critical").length,
     warning: patients.filter((p) => p.status === "Warning").length,
     normal: patients.filter((p) => p.status === "Normal").length,
-  }), []);
+  }), [patients]);
+
+  const handleAddPatient = (patient: Patient) => {
+    setPatients((prev) => [...prev, patient]);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -54,10 +60,13 @@ export default function Dashboard() {
               <p className="text-xs text-muted-foreground">Dr. {doctorName}</p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={logout}>
-            <LogOut className="h-4 w-4 mr-2" />
-            Sign Out
-          </Button>
+          <div className="flex items-center gap-2">
+            <AddPatientDialog onAdd={handleAddPatient} patientCount={patients.length} />
+            <Button variant="ghost" size="sm" onClick={logout}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 
