@@ -60,10 +60,13 @@ export default function Dashboard() {
               <p className="text-xs text-muted-foreground">Dr. {doctorName}</p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={logout}>
-            <LogOut className="h-4 w-4 mr-2" />
-            Sign Out
-          </Button>
+          <div className="flex items-center gap-2">
+            <AddPatientDialog onAdd={handleAddPatient} patientCount={patients.length} />
+            <Button variant="ghost" size="sm" onClick={logout}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 
