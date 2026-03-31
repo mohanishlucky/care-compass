@@ -21,6 +21,7 @@ const initialPatients = generatePatients();
 export default function Dashboard() {
   const { doctorName, logout } = useAuth();
   const navigate = useNavigate();
+  const [patients, setPatients] = useState<Patient[]>(initialPatients);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<PatientStatus | "All">("All");
 
@@ -32,14 +33,18 @@ export default function Dashboard() {
       const matchFilter = filter === "All" || p.status === filter;
       return matchSearch && matchFilter;
     });
-  }, [search, filter]);
+  }, [search, filter, patients]);
 
   const stats = useMemo(() => ({
     total: patients.length,
     critical: patients.filter((p) => p.status === "Critical").length,
     warning: patients.filter((p) => p.status === "Warning").length,
     normal: patients.filter((p) => p.status === "Normal").length,
-  }), []);
+  }), [patients]);
+
+  const handleAddPatient = (patient: Patient) => {
+    setPatients((prev) => [...prev, patient]);
+  };
 
   return (
     <div className="min-h-screen bg-background">
