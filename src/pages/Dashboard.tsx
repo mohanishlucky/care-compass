@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
 import { generatePatients } from "@/lib/mock-data";
 import { PatientCard } from "@/components/PatientCard";
+import { AddPatientDialog } from "@/components/AddPatientDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,9 +14,9 @@ import {
   AlertTriangle,
   Activity,
 } from "lucide-react";
-import { PatientStatus } from "@/lib/types";
+import { Patient, PatientStatus } from "@/lib/types";
 
-const patients = generatePatients();
+const initialPatients = generatePatients();
 
 export default function Dashboard() {
   const { doctorName, logout } = useAuth();
