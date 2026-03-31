@@ -4,8 +4,20 @@ import { useAuth } from "@/lib/auth-context";
 import { generatePatients } from "@/lib/mock-data";
 import { PatientCard } from "@/components/PatientCard";
 import { AddPatientDialog } from "@/components/AddPatientDialog";
+import { EditPatientDialog } from "@/components/EditPatientDialog";
+import { NotificationCenter } from "@/components/NotificationCenter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Heart,
   LogOut,
@@ -15,6 +27,7 @@ import {
   Activity,
 } from "lucide-react";
 import { Patient, PatientStatus } from "@/lib/types";
+import { toast } from "sonner";
 
 const initialPatients = generatePatients();
 
@@ -24,6 +37,11 @@ export default function Dashboard() {
   const [patients, setPatients] = useState<Patient[]>(initialPatients);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<PatientStatus | "All">("All");
+
+  // Edit / Delete state
+  const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Patient | null>(null);
 
   const filtered = useMemo(() => {
     return patients.filter((p) => {
@@ -46,6 +64,17 @@ export default function Dashboard() {
     setPatients((prev) => [...prev, patient]);
   };
 
+  const handleEditPatient = (updated: Patient) => {
+    setPatients((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+  };
+
+  const handleDeletePatient = () => {
+    if (!deleteTarget) return;
+    setPatients((prev) => prev.filter((p) => p.id !== deleteTarget.id));
+    toast.success(`Patient ${deleteTarget.name} removed`);
+    setDeleteTarget(null);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -61,6 +90,7 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <NotificationCenter patients={patients} onPatientClick={(id) => navigate(`/patient/${id}`)} />
             <AddPatientDialog onAdd={handleAddPatient} patientCount={patients.length} />
             <Button variant="ghost" size="sm" onClick={logout}>
               <LogOut className="h-4 w-4 mr-2" />
@@ -121,6 +151,8 @@ export default function Dashboard() {
               key={p.id}
               patient={p}
               onClick={() => navigate(`/patient/${p.id}`)}
+              onEdit={() => { setEditingPatient(p); setEditOpen(true); }}
+              onDelete={() => setDeleteTarget(p)}
             />
           ))}
         </div>
@@ -131,6 +163,32 @@ export default function Dashboard() {
           </div>
         )}
       </main>
+
+      {/* Edit Dialog */}
+      <EditPatientDialog
+        patient={editingPatient}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        onSave={handleEditPatient}
+      />
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Patient</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove <strong>{deleteTarget?.name}</strong> ({deleteTarget?.id}) from monitoring? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeletePatient} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

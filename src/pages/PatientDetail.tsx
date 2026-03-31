@@ -2,8 +2,10 @@ import { useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { generatePatients, generateSensorData, analyzeData } from "@/lib/mock-data";
 import { generatePatientReport } from "@/lib/generate-report";
+import { useAuth } from "@/lib/auth-context";
 import { StatusBadge } from "@/components/StatusBadge";
 import { VitalChart } from "@/components/VitalChart";
+import { DoctorNotes } from "@/components/DoctorNotes";
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
@@ -21,6 +23,7 @@ const patients = generatePatients();
 export default function PatientDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { doctorName } = useAuth();
   const patient = patients.find((p) => p.id === id);
 
   const { readings, analytics } = useMemo(() => {
@@ -181,6 +184,9 @@ export default function PatientDetail() {
             </div>
           </div>
         )}
+
+        {/* Doctor Notes */}
+        <DoctorNotes patientId={patient.id} doctorName={doctorName} />
       </main>
     </div>
   );
