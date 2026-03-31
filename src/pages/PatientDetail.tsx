@@ -23,6 +23,7 @@ const patients = generatePatients();
 export default function PatientDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { doctorName } = useAuth();
   const patient = patients.find((p) => p.id === id);
 
   const { readings, analytics } = useMemo(() => {
